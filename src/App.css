@@ -1,8 +1,30 @@
-.App {
+/* .App {
   text-align: center;
+} */
+
+:root {
+  --main-color: #0d47a1;
+  --secondary-color: white;
+  --main-text-color: #3e5869;
+  --send-message-form: #F5F5F5;
 }
 
-.App-logo {
+.col-2, .col-8 {
+  padding-left:0px !important;
+  padding-right:0px !important;
+}
+
+.row {
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.container-fluid {
+  padding-left:0px !important;
+  padding-right:0px !important;
+}
+
+/* .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 40vmin;
   pointer-events: none;
@@ -17,17 +39,110 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+} */
+
+.title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  color: var(--secondary-color);
+  background: var(--main-color);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
 }
 
-.App-link {
-  color: #61dafb;
+.send-message-form {
+  background: #eeeeee;
+  display: flex;
+  box-sizing: border-box;
+  height: 50px;
+  padding: 10px 5px;
+  border-top: black solid 1px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.send-message-form input {
+  width: 100%;
+  padding: 15px 10px;
+  border: none;
+  margin: 0;
+  background: var(--secondary-color);
+  font-weight: 200;
+  color:black;
 }
+
+.send-message-form input:focus {
+  outline-width: 0;
+}
+
+.send-message-form input::placeholder {
+  color: black;
+}
+
+.user-list {
+  box-sizing: border-box;
+  padding: 0 10px 0 10px !important;
+  margin: 0;
+  overflow: auto;
+  background: #eeeeee;
+  border-left: black solid 1px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* padding-left: 0px !important;
+  padding-right: 0px !important; */
+}
+
+.user-list__listItems {
+  padding: 0 !important;
+  margin: 0;
+}
+
+.user-list li {
+  cursor: pointer;
+}
+
+
+.room-list {
+  box-sizing: border-box;
+  padding: 0 0 0 10px !important;
+  margin: 0;
+  overflow: auto;
+  background: #eeeeee;
+  border-right: black solid 1px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* padding-left: 0px !important;
+  padding-right: 0px !important; */
+}
+
+.room-list__listItems {
+  padding: 0 !important;
+  margin: 0;
+}
+
+.room-list li {
+  cursor: pointer;
+}
+
+.room-name {
+  position: relative;
+  width: 100%;
+  display: flex;
+  padding-right: 10px;
+  cursor: pointer;
+}
+
+.close-button {
+  position: absolute;
+  right: 3px;
+  top: 5px;
+  margin-right: 5px;
+  pointer-events: auto;
+}
+

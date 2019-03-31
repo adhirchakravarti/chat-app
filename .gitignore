@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.gitsecret/keys/random_seed
+/src/chatkitConfig.js
+
