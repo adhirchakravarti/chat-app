@@ -28,6 +28,8 @@ class App extends Component {
     this.createNewRoom = this.createNewRoom.bind(this);
     this.changeActiveRoom = this.changeActiveRoom.bind(this);
     this.deleteRoom = this.deleteRoom.bind(this);
+    this.removeUserFromRoom = this.removeUserFromRoom.bind(this);
+    this.addUserToRoom = this.addUserToRoom.bind(this);
     this.filterMessages = this.filterMessages.bind(this);
     this.filterUsers = this.filterUsers.bind(this);
   }
@@ -215,6 +217,53 @@ class App extends Component {
     }
   }
 
+  removeUserFromRoom(userId, roomId) {
+    this.state.currentUser.removeUserFromRoom({
+      userId: userId,
+      roomId: roomId
+    })
+      .then(() => {
+        console.log(`Removed ${userId} from room ${roomId}`)
+      })
+      .catch(err => {
+        console.log(`Error removing ${userId} from room ${roomId}: ${err}`)
+      })
+  }
+
+  addUserToRoom(userId, roomId) {
+    let userExists = null;
+    for (let users of this.state.users) {
+      userExists = users.users.findIndex((userObj)=>userObj.id === userId);
+      if (userExists > 0) break;
+    }
+    if (userExists !== -1) {
+      this.state.currentUser.addUserToRoom({
+        userId: userId,
+        roomId: roomId
+      }).then((room) => {
+          console.log(`Added ${userId} to room ${roomId}`);
+          console.log(room);
+          let userToAdd;
+          for (let user in room.userStore.users) {
+            if (room.userStore.users[user].id === userId){
+              userToAdd = room.userStore.users[user];
+            }
+          }
+          let usersInState = [...this.state.users];
+          let roomWithUser = usersInState.findIndex((room)=>room.roomId === roomId);
+          let relevantRoom = usersInState[roomWithUser];
+          relevantRoom.users.push(userToAdd);
+          console.log(relevantRoom);
+          usersInState.splice(roomWithUser, 1, relevantRoom);
+          console.log(usersInState);
+          this.setState((prevState)=>({users:usersInState}), ()=>console.log(this.state));
+        })
+        .catch(err => {
+          console.log(`Error adding ${userId} to room ${roomId}: ${err}`)
+        })
+    }
+  }
+
   render() {
     return (
       <div className="App">
@@ -227,13 +276,17 @@ class App extends Component {
               <RoomList 
                   rooms={this.state.currentUser!==null? this.state.roomSubscriptions:[]} 
                   changeActiveRoom={this.changeActiveRoom}
-                  deleteRoom={this.deleteRoom}/>
+                  deleteRoom={this.deleteRoom}
+                  addUserToRoom={this.addUserToRoom}
+                  users={this.state.currentUsers}/>
             </div>
             <div className="col-8">
               <MessageList messages={this.state.messagesCurrentRoom}/>
             </div>
             <div className="col-2">
-              <UserList users={this.state.currentUsers} newChatRoom={this.createNewRoom}/>
+              <UserList users={this.state.currentUsers} newChatRoom={this.createNewRoom}
+                        currentRoom={this.state.currentRoomId}
+                        removeUserFromRoom={this.removeUserFromRoom}/>
             </div>
           </div>
         </div>

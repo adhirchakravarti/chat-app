@@ -1,8 +1,43 @@
 import React from 'react';
+import { ContextMenu, MenuItem, ContextMenuTrigger, connectMenu} from "react-contextmenu";
+import PropTypes from 'prop-types';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 library.add(faTimes);
+
+const MENU_TYPE = 'DYNAMIC_ROOM';
+
+function collect (props) {
+    return props;
+};
+
+const DynamicMenu = (props) => {
+    const { id, trigger } = props;
+    console.log(trigger, props);
+    const handleItemClick = trigger ? trigger.onItemClick : null;
+
+    return (
+        <ContextMenu id={id}>
+            {trigger && <MenuItem onClick={handleItemClick} data={{ action: 'AddUser' }}>{`Add user to room ${trigger.name}`}</MenuItem>}
+            {/* {trigger && (
+                trigger.allowRemoval
+                    ? <MenuItem onClick={handleItemClick} data={{ action: 'Removed' }}>{`Remove 1 ${trigger.name}`}</MenuItem>
+                    : <MenuItem disabled>{'Removal disabled'}</MenuItem>
+            )} */}
+        </ContextMenu>
+    );
+};
+
+DynamicMenu.propTypes = {
+    id: PropTypes.string.isRequired,
+    trigger: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        onItemClick: PropTypes.func.isRequired
+    })
+};
+
+const ConnectedMenu = connectMenu(MENU_TYPE)(DynamicMenu);
 
 class roomList extends React.Component {
     constructor(props){
@@ -10,6 +45,7 @@ class roomList extends React.Component {
         this.handleDblClick = this.handleDblClick.bind(this);
         this.contextMenu = this.contextMenu.bind(this);
         this.handleCloseChatRoom = this.handleCloseChatRoom.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
     componentDidMount(){
@@ -30,6 +66,17 @@ class roomList extends React.Component {
         e.preventDefault();
         alert('right-click!');
     }
+    handleClick(e, data) {
+        console.log(e,data);
+        let userId = prompt(`Enter userId of user to add to room ${data.name}`);
+        console.log(userId);
+        if (userId !== '' ) {
+            let userExists = this.props.users.findIndex((userObj)=>userObj.id === userId);
+            if (userExists === -1) {
+                this.props.addUserToRoom(userId, data.roomId);
+            }
+        }
+    }
     render(){
         return (
             <div className ="room-list">
@@ -38,14 +85,17 @@ class roomList extends React.Component {
                     {this.props.rooms.map((room)=>{
                         return (
                             <li key={room.id}>
-                                <div className = "room-name" onDoubleClick={(e)=>this.handleDblClick(e, room.id)} 
-                                    onContextMenu={this.contextMenu}>{room.name} ({room.id})<FontAwesomeIcon className="close-button" icon="times" onClick={(e)=>this.handleCloseChatRoom(e,room.id)} name="icon"/>
-                                </div>
-                                {/* <FontAwesomeIcon icon="times" onClick={(e)=>this.handleCloseChatRoom(e,room.id)} name="icon"/> */}
+                                <ContextMenuTrigger id={MENU_TYPE} holdToDisplay={1000} name={room.name} roomId={room.id}
+                                                    collect={collect} onItemClick={this.handleClick}>
+                                    <div className = "room-name" onDoubleClick={(e)=>this.handleDblClick(e, room.id)} 
+                                        >{room.name} ({room.id})<FontAwesomeIcon className="close-button" icon="times" onClick={(e)=>this.handleCloseChatRoom(e,room.id)} name="icon"/>
+                                    </div>
+                                </ContextMenuTrigger>
                             </li>
                         );
                     })}
                 </ul>
+                <ConnectedMenu />
             </div>
         );
     }
