@@ -17,11 +17,6 @@ const DynamicMenu = (props) => {
     return (
         <ContextMenu id={id}>
             {trigger && <MenuItem onClick={handleItemClick} data={{ action: 'Remove' }}>{`Remove ${trigger.name} from room`}</MenuItem>}
-            {/* {trigger && (
-                trigger.allowRemoval
-                    ? <MenuItem onClick={handleItemClick} data={{ action: 'Removed' }}>{`Remove 1 ${trigger.name}`}</MenuItem>
-                    : <MenuItem disabled>{'Removal disabled'}</MenuItem>
-            )} */}
         </ContextMenu>
     );
 };
@@ -57,8 +52,9 @@ class UserList extends React.Component {
     handleClick = (e, data) => {
         console.log(e,data);
         if (data.action === 'Remove') {
-            console.log(data);
-        } 
+            //console.log(data);
+            this.props.removeUserFromRoom(data.userId, this.props.currentRoom);
+        }
     }
     
     render() {

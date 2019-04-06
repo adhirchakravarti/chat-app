@@ -30,6 +30,8 @@ class App extends Component {
     this.deleteRoom = this.deleteRoom.bind(this);
     this.removeUserFromRoom = this.removeUserFromRoom.bind(this);
     this.addUserToRoom = this.addUserToRoom.bind(this);
+    this.getUserObject = this.getUserObject.bind(this);
+    this.getRoomWithUsersByRoomId = this.getRoomWithUsersByRoomId.bind(this);
     this.filterMessages = this.filterMessages.bind(this);
     this.filterUsers = this.filterUsers.bind(this);
   }
@@ -216,46 +218,78 @@ class App extends Component {
       })
     }
   }
+  getUserObject(userId) {
+    if (userId) {
+      let userExists = null;
+      let userObj;
+      for (let users of this.state.users) {
+        userExists = users.users.findIndex((user)=>user.id === userId);
+        //userObj = users.users.find((user)=>user.id === userId);
+        if (userExists !== -1) {
+          userObj = users.users[userExists];
+          break;
+        }
+      }
+      if (userObj !== undefined) {
+        return userObj;
+      }
+    }
+  }
+
+  getRoomWithUsersByRoomId(roomId) {
+    let allRoomsWithUsers = [...this.state.users];
+    let relevantRoom =  allRoomsWithUsers.find((room)=>room.roomId === roomId);
+    let relevantRoomIndex = allRoomsWithUsers.findIndex((room)=>room.roomId === roomId);
+    if (relevantRoom !== undefined && relevantRoomIndex !== -1) {
+      console.log(relevantRoom, relevantRoomIndex);
+      return {
+        room: relevantRoom,
+        index: relevantRoomIndex
+      };
+    }
+  }
 
   removeUserFromRoom(userId, roomId) {
-    this.state.currentUser.removeUserFromRoom({
-      userId: userId,
-      roomId: roomId
-    })
-      .then(() => {
-        console.log(`Removed ${userId} from room ${roomId}`)
+    if (userId && roomId) {
+      let userObj = this.getUserObject(userId);
+      this.state.currentUser.removeUserFromRoom({
+        userId: userId,
+        roomId: roomId
       })
-      .catch(err => {
-        console.log(`Error removing ${userId} from room ${roomId}: ${err}`)
-      })
+        .then((room) => {
+          console.log(`Removed ${userId} from room ${roomId}`);
+          let retrievedRoomObj = this.getRoomWithUsersByRoomId(room.id);
+          let relevantRoom = retrievedRoomObj.room;
+          let relevantRoomIndex = retrievedRoomObj.index;
+          let findUserIndex = relevantRoom.users.findIndex((user)=>user.id === userObj.id);
+          if (findUserIndex !== -1) {
+            relevantRoom.users.splice(findUserIndex, 1);
+            let allRoomsWithUsers = [...this.state.users];
+            if (relevantRoomIndex !== -1) {
+              allRoomsWithUsers.splice(relevantRoomIndex, 1, relevantRoom);
+              this.setState(()=>({users:allRoomsWithUsers}),()=>console.log(this.state));
+            }
+          }
+        })
+        .catch(err => {
+          console.log(`Error removing ${userId} from room ${roomId}: ${err}`)
+        })
+    }
   }
 
   addUserToRoom(userId, roomId) {
-    let userExists = null;
-    for (let users of this.state.users) {
-      userExists = users.users.findIndex((userObj)=>userObj.id === userId);
-      if (userExists > 0) break;
-    }
-    if (userExists !== -1) {
+    let userObj = this.getUserObject(userId);
+    if (userObj !== undefined) {
       this.state.currentUser.addUserToRoom({
-        userId: userId,
+        userId: userObj.id,
         roomId: roomId
       }).then((room) => {
           console.log(`Added ${userId} to room ${roomId}`);
-          console.log(room);
-          let userToAdd;
-          for (let user in room.userStore.users) {
-            if (room.userStore.users[user].id === userId){
-              userToAdd = room.userStore.users[user];
-            }
-          }
           let usersInState = [...this.state.users];
           let roomWithUser = usersInState.findIndex((room)=>room.roomId === roomId);
           let relevantRoom = usersInState[roomWithUser];
-          relevantRoom.users.push(userToAdd);
-          console.log(relevantRoom);
+          relevantRoom.users.push(userObj);
           usersInState.splice(roomWithUser, 1, relevantRoom);
-          console.log(usersInState);
           this.setState((prevState)=>({users:usersInState}), ()=>console.log(this.state));
         })
         .catch(err => {

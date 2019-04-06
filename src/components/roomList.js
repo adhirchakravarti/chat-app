@@ -13,27 +13,24 @@ function collect (props) {
 };
 
 const DynamicMenu = (props) => {
+    console.log("DM props = ",props);
     const { id, trigger } = props;
-    console.log(trigger, props);
+    //console.log(trigger, props);
     const handleItemClick = trigger ? trigger.onItemClick : null;
 
     return (
         <ContextMenu id={id}>
             {trigger && <MenuItem onClick={handleItemClick} data={{ action: 'AddUser' }}>{`Add user to room ${trigger.name}`}</MenuItem>}
-            {/* {trigger && (
-                trigger.allowRemoval
-                    ? <MenuItem onClick={handleItemClick} data={{ action: 'Removed' }}>{`Remove 1 ${trigger.name}`}</MenuItem>
-                    : <MenuItem disabled>{'Removal disabled'}</MenuItem>
-            )} */}
         </ContextMenu>
     );
 };
 
 DynamicMenu.propTypes = {
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     trigger: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        onItemClick: PropTypes.func.isRequired
+        name: PropTypes.string,
+        onItemClick: PropTypes.func, 
+        roomId: PropTypes.string
     })
 };
 
@@ -85,7 +82,7 @@ class roomList extends React.Component {
                     {this.props.rooms.map((room)=>{
                         return (
                             <li key={room.id}>
-                                <ContextMenuTrigger id={MENU_TYPE} holdToDisplay={1000} name={room.name} roomId={room.id}
+                                <ContextMenuTrigger id={MENU_TYPE} name={room.name} roomId={room.id}
                                                     collect={collect} onItemClick={this.handleClick}>
                                     <div className = "room-name" onDoubleClick={(e)=>this.handleDblClick(e, room.id)} 
                                         >{room.name} ({room.id})<FontAwesomeIcon className="close-button" icon="times" onClick={(e)=>this.handleCloseChatRoom(e,room.id)} name="icon"/>
